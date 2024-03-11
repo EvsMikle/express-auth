@@ -1,6 +1,8 @@
 const crypto = require('crypto');
+const jwt = require('jsonwebtoken');
 const db = require("../database/models");
 const User = db.user;
+const secretKey = 'express';
 
 async function hashedPassword(password) {
   //Engrypt password
@@ -32,21 +34,28 @@ exports.signup = async (req, res) => {
 
   const pwd = await hashedPassword(req.body.password);
 
+  const payload = {
+    userId: 123,
+    username: 'example_user'
+  };
+  const token = jwt.sign(payload, secretKey);
   const newUser = {
     username: req.body.username,
     email: req.body.email,
     password: pwd,
-    phone: req.body.phone
+    phone: req.body.phone,
+    accessToken: token,
+    refreshToken: token
   }
 
   const data = await findUser({ email: req.body.email });
 
   if (data.count > 0) {
-    res.send({'registed': true});
+    res.send({ 'registed': true });
     return;
   } else {
     User.create(newUser);
-    res.send({'registed': false});
+    res.send({ 'registed': false,  'accessToken': token});
     // .then(data => {
     //   res.send({
     //     message: "Signup Successful!",
@@ -75,8 +84,7 @@ exports.login = async (req, res) => {
   const pwd = await hashedPassword(req.body.password);
 
   const data = await findUser({ email: req.body.email, password: pwd });
-
-  (data.count > 0) ? res.status(200).send({ auth: true }) : res.status(200).send({ auth: false });
+  (data.count > 0) ? res.status(200).send({ auth: true, 'accessToken': data.user.dataValues.accessToken }) : res.status(200).send({ auth: false });
 }
 
 module.exports = exports;
