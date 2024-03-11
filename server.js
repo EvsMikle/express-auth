@@ -20,7 +20,7 @@ app.use(express.urlencoded({ extended: true }));
 // Prepare DB
 db.connection.sync();
 
-require("./src/route/user.route")(app);
+require("./src/route/route")(app);
 
 // set port, listen for requests
 const PORT = process.env.PORT || 8080;

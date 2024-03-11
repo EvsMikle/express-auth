@@ -13,4 +13,6 @@ db.connection = sequelize;
 
 db.user = require('./user.model.js')(db.connection, db.Sequelize)
 
+db.focus = require('./focus.model.js')(db.connection, db.Sequelize)
+
 module.exports = db;

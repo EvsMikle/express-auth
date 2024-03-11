@@ -14,7 +14,7 @@ async function findUser(where) {
     allUsers = await User.findAll({ where: where });
     const count = await User.count({ where: where });
 
-    return (allUsers instanceof Array) ? {user: allUsers[0], count: count} : { user: '', count: 0 };
+    return (allUsers instanceof Array) ? { user: allUsers[0], count: count } : { user: '', count: 0 };
   }
   catch (ex) {
     throw ex;
@@ -23,7 +23,6 @@ async function findUser(where) {
 
 exports.signup = async (req, res) => {
   // Do something with the form data
-  res.send('Form data received');
   if (!req.body.username, !req.body.email, !req.body.password) {
     res.status(400).send({
       message: 'Please provide all the fields.'
@@ -40,19 +39,30 @@ exports.signup = async (req, res) => {
     phone: req.body.phone
   }
 
-  User.create(newUser)
-    .then(data => {
-      res.send({
-        message: "Signup Successful!"
-      });
-    })
-    .catch(err => {
-      res.status(500).send({
-        message:
-          err.message || "Some error occurred while signing you up.",
-        errObj: err
-      });
-    });
+  const data = await findUser({ email: req.body.email });
+
+  if (data.count > 0) {
+    res.send({'registed': true});
+    return;
+  } else {
+    User.create(newUser);
+    res.send({'registed': false});
+    // .then(data => {
+    //   res.send({
+    //     message: "Signup Successful!",
+    //     'registed': false
+    //   });
+    // })
+    // .catch(err => {
+    //   res.status(500).send({
+    //     message:
+    //       err.message || "Some error occurred while signing you up.",
+    //     errObj: err
+    //   });
+    // });
+  }
+
+
 }
 
 exports.login = async (req, res) => {
@@ -64,9 +74,9 @@ exports.login = async (req, res) => {
 
   const pwd = await hashedPassword(req.body.password);
 
-  const data = await findUser({email: req.body.email, password: pwd});
+  const data = await findUser({ email: req.body.email, password: pwd });
 
-  (data.count > 0)? res.status(200).send({ auth: true }): res.status(200).send({ auth: false });
+  (data.count > 0) ? res.status(200).send({ auth: true }) : res.status(200).send({ auth: false });
 }
 
 module.exports = exports;
