@@ -14,6 +14,8 @@ module.exports = app => {
     router.post("/getData", focus.getData);
 
     router.post("/removefocus", focus.delData);
+
+    router.post("/getDataByID", focus.getRow);
     
     app.use('/', router);
 };

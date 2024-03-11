@@ -16,8 +16,11 @@ exports.save = async (req, res) => {
     }
 
     if (req.body.id === 0) {
-        Focus.create(newData);
-        res.send({ 'successful': true });
+        const success = Focus.create(newData);
+        res.send({ 'success': success });
+    }else{
+        const success = Focus.update({'title': req.body.title, 'content': req.body.content}, { where: {'id': req.body.id} });
+        res.send({ 'success': success });
     }
 }
 
@@ -26,6 +29,21 @@ exports.getData = async (req, res) => {
     try {
         const data = await Focus.findAll({ limit: limit, order: [['id', 'DESC']] });
         return res.json(data);
+    }
+    catch (ex) {
+        throw ex;
+    }
+}
+
+exports.getRow = async (req, res) => {
+    const id = req.body.id;
+    if(id === 0) {
+        return res.json({'title': '', 'content': ''});
+    }
+
+    try {
+        const row = await Focus.findByPk(id);
+        return res.json(row);
     }
     catch (ex) {
         throw ex;
